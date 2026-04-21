@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Viewer - Interactive Map</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="header-with-logout">
+        <h1>Interactive map</h1>
+        <span id="mapTitle">Map name: map12</span>
+        <span id="groupInfo"></span>
+        <button class="btn btn-logout" onclick="logout()">Log out</button>
+    </div>
+    
+    <div class="map-container">
+        <div id="map"></div>
+        
+        <div class="map-controls">
+            <button class="control-btn zoom-in" onclick="zoomIn()">+</button>
+            <button class="control-btn zoom-out" onclick="zoomOut()">-</button>
+        </div>
+        
+        <div class="marker-details">
+            <div class="details-content">
+                <div class="detail-row">
+                    <label><input type="checkbox"> Tag</label>
+                </div>
+                <div class="detail-row">
+                    <label><input type="checkbox"> Desc</label>
+                </div>
+                <div class="detail-row">
+                    <label>Category <select><option>Select...</option><option>Add new category</option></select></label>
+                </div>
+                <div class="detail-row">
+                    <span>Added: <span id="dateAdded">12.03.2026</span></span>
+                </div>
+                <div class="detail-row">
+                    <span>La: <span id="markerLat">63.2341434</span></span>
+                </div>
+                <div class="detail-row">
+                    <span>Lo: <span id="markerLon">43.1238548</span></span>
+                </div>
+                <button class="btn btn-danger" onclick="deleteMarker()">Delete</button>
+            </div>
+        </div>
+        
+        <div class="search-filters">
+            <h3>Search and Filters</h3>
+            <input type="text" placeholder="Search locations..." class="search-input">
+            <div class="filter-group">
+                <label>Category:</label>
+                <select>
+                    <option>All</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Time added:</label>
+                <select>
+                    <option>All</option>
+                </select>
+            </div>
+            <button class="btn btn-primary btn-full">Find</button>
+            <div class="found-tags">
+                <h4>Found tags:</h4>
+                <div class="tag-item tag-1">
+                    <div>Tag 1</div>
+                    <div class="tag-date">Added: 12.03.2026</div>
+                    <div class="tag-coords">La: 63.2341434<br>Lo: 43.1238548</div>
+                </div>
+                <div class="tag-item tag-2">
+                    <div>Tag 2</div>
+                    <div class="tag-date">Added: 12.03.2026</div>
+                    <div class="tag-coords">La: 63.2341434<br>Lo: 43.1238548</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="object-control">
+            <h3>Object Control</h3>
+            <button class="control-item add-marker" onclick="addMarkerMode()">+ Add Marker</button>
+            <button class="control-item edit-marker" onclick="editMarkerMode()">Edit Marker</button>
+            <button class="control-item delete-marker" onclick="deleteMarkerMode()">Delete Marker</button>
+        </div>
+        
+        <div class="event-log">
+            <h3>Event log</h3>
+            <div class="log-entry">
+                <span>12:45</span>
+                <span>Tag: tag21 edited</span>
+            </div>
+            <div class="log-entry">
+                <span>12:41</span>
+                <span>New tag: tag21 added</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+    <script>
+        initializeMap();
+    </script>
+</body>
+</html>

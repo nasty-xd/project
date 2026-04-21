@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Interactive Map</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header-with-logout">
+        <h1>Interactive map</h1>
+        <button class="btn btn-logout" onclick="logout()">Log out</button>
+    </div>
+    <div class="container-dashboard">
+        <div class="dashboard-section">
+            <h2>Your maps</h2>
+            <div class="map-list">
+                <div class="map-item" onclick="openMap(1)">1</div>
+                <div class="map-item" onclick="openMap(12)">12</div>
+                <div class="map-item" onclick="openMap(123)">123</div>
+                <button class="map-item create-item" onclick="createNewMap()">+ Create new map</button>
+            </div>
+        </div>
+        <div class="dashboard-section">
+            <h2>Your groups</h2>
+            <div class="group-list">
+                <div class="group-item" onclick="openGroupMap('map1')">
+                    <span>map1</span>
+                    <span class="badge">+1</span>
+                </div>
+                <div class="group-item" onclick="openGroupMap('map12')">
+                    <span>map12</span>
+                    <span class="badge">+3</span>
+                </div>
+                <button class="group-button" onclick="showCreateGroupModal()">+ Create new group code</button>
+                <button class="group-button join-button" onclick="showJoinGroupModal()">Join group</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
