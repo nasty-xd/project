@@ -43,38 +43,41 @@
                 <div class="detail-row">
                     <span>Lo: <span id="markerLon">43.1238548</span></span>
                 </div>
-                <button class="btn btn-danger" onclick="deleteMarker()">Delete</button>
+                <div class="details-buttons">
+                    <button class="btn btn-secondary btn-sm" onclick="editMarkerDetails()">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteSelectedMarker()">Delete</button>
+                </div>
             </div>
         </div>
         
         <div class="search-filters">
             <h3>Search and Filters</h3>
-            <input type="text" placeholder="Search locations..." class="search-input">
+            <input type="text" placeholder="Search locations..." class="search-input" onkeyup="updateSearchResults()">
             <div class="filter-group">
                 <label>Category:</label>
-                <select>
-                    <option>All</option>
+                <select onchange="updateSearchResults()">
+                    <option value="All">All</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>Time added:</label>
-                <select>
-                    <option>All</option>
+                <select onchange="updateSearchResults()">
+                    <option value="all">All</option>
                 </select>
             </div>
-            <button class="btn btn-primary btn-full">Find</button>
+            <div class="filter-group">
+                <label>Sort by:</label>
+                <select onchange="changeSortBy(this.value)">
+                    <option value="name">Name (A-Z)</option>
+                    <option value="date_new">Newest First</option>
+                    <option value="date_old">Oldest First</option>
+                    <option value="category">Category</option>
+                    <option value="distance">Distance</option>
+                </select>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="updateSearchResults()">Find</button>
             <div class="found-tags">
                 <h4>Found tags:</h4>
-                <div class="tag-item tag-1">
-                    <div>Tag 1</div>
-                    <div class="tag-date">Added: 12.03.2026</div>
-                    <div class="tag-coords">La: 63.2341434<br>Lo: 43.1238548</div>
-                </div>
-                <div class="tag-item tag-2">
-                    <div>Tag 2</div>
-                    <div class="tag-date">Added: 12.03.2026</div>
-                    <div class="tag-coords">La: 63.2341434<br>Lo: 43.1238548</div>
-                </div>
             </div>
         </div>
         
