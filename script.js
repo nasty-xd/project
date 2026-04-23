@@ -126,13 +126,19 @@ function initializeMap() {
     if (!document.getElementById('map')) return;
 
     // Initialize Leaflet map - without bounds restrictions
-    map = L.map('map').setView([63.2341434, 43.1238548], 13);
-    
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
+    map = L.map('map', {
+    maxBounds: [
+        [-90, -180],
+        [90, 180]
+    ],
+    maxBoundsViscosity: 1.0
+}).setView([63.2341434, 43.1238548], 5);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
+    noWrap: true
+}).addTo(map);
 
     // Initialize categories dropdown
     initializeCategoryFilters();
