@@ -20,6 +20,11 @@ function logout() {
     }
 }
 
+function goBack() {
+    window.location.href = 'dashboard.html';
+}
+
+
 function createNewMap() {
     window.location.href = 'create-map.html';
 }
@@ -143,6 +148,8 @@ function initializeMap() {
 
     // Initialize Leaflet map - without bounds restrictions
     map = L.map('map', {
+        zoomControl: false,
+
     maxBounds: [
         [-90, -180],
         [90, 180]
@@ -163,12 +170,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     initializeTimeFilters();
     const mapId = getQueryParam('id');
     loadMarkersForMap(mapId);
+    loadMapTitle(mapId);
 
-    map.on('click', function(e) {
-        if (currentMode === 'add') {
-            addMarkerWithData(e.latlng);
-        }
-    });
+    
 
     addEventLog('Map loaded successfully');
     // Add sample markers with data
@@ -732,6 +736,21 @@ function renameMap(mapId) {
     localStorage.setItem('maps', JSON.stringify(maps));
 
     renderMaps();
+}
+
+function loadMapTitle(mapId) {
+
+    const maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+    const currentMap = maps.find(m => m.id == mapId);
+
+    if (!currentMap) return;
+
+    const title = document.getElementById('mapTitle');
+
+    if (title) {
+        title.textContent = 'Map name: ' + currentMap.name;
+    }
 }
 
 // Utility Functions
