@@ -77,13 +77,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const createMapForm = document.getElementById('createMapForm');
-    if (createMapForm) {
-        createMapForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Map created successfully!');
-            window.location.href = 'dashboard.html';
-        });
-    }
+if (createMapForm) {
+    createMapForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const nameInput = document.querySelector('input');
+        const mapName = nameInput.value.trim() || 'Untitled map';
+
+        let maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+        const newMap = {
+            id: Date.now(),
+            name: mapName,
+            markers: []
+        };
+
+        maps.unshift(newMap);
+
+        localStorage.setItem('maps', JSON.stringify(maps));
+
+        // 👉 переходим на карту
+        window.location.href = 'map.html?id=' + newMap.id;
+    });
+}
 
     const createGroupForm = document.getElementById('createGroupForm');
     if (createGroupForm) {
@@ -145,9 +161,18 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     
     // Initialize time filters
     initializeTimeFilters();
+    const mapId = getQueryParam('id');
+    loadMarkersForMap(mapId);
 
+    map.on('click', function(e) {
+        if (currentMode === 'add') {
+            addMarkerWithData(e.latlng);
+        }
+    });
+
+    addEventLog('Map loaded successfully');
     // Add sample markers with data
-    addSampleMarkers();
+    
 
     // Handle map clicks for adding markers
     map.on('click', function(e) {
@@ -159,7 +184,16 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     // Log event
     addEventLog('Map loaded successfully');
 }
+function loadMarkersForMap(mapId) {
+    const maps = JSON.parse(localStorage.getItem('maps')) || [];
+    const currentMap = maps.find(m => m.id == mapId);
 
+    if (!currentMap) return;
+
+    currentMap.markers.forEach(data => {
+        addMarkerWithData({ lat: data.lat, lng: data.lng }, data);
+    });
+}
 // Initialize Category Filters
 function initializeCategoryFilters() {
     const categorySelects = document.querySelectorAll('select');
@@ -291,6 +325,16 @@ function addMarkerWithData(latlng, data = null) {
     
     // Update search results
     updateSearchResults();
+   
+const mapId = getQueryParam('id');
+let maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+const mapIndex = maps.findIndex(m => m.id == mapId);
+
+if (mapIndex !== -1) {
+    maps[mapIndex].markers.push(markerInfo);
+    localStorage.setItem('maps', JSON.stringify(maps));
+}
 }
 
 function addMarker(latlng) {
@@ -613,6 +657,81 @@ function sortResults(results) {
 function changeSortBy(newSort) {
     sortBy = newSort;
     updateSearchResults();
+}
+
+function renderMaps() {
+    const mapList = document.getElementById('mapList');
+
+    if (!mapList) return;
+
+    const maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+    mapList.innerHTML = '';
+
+    maps.forEach(map => {
+
+        const item = document.createElement('div');
+        item.className = 'map-item';
+
+        item.innerHTML = `
+            <div class="map-title">${map.name}</div>
+
+            <div class="map-actions">
+                <button class="map-btn open-btn">Open</button>
+                <button class="map-btn edit-btn">Rename</button>
+                <button class="map-btn delete-btn">Delete</button>
+            </div>
+        `;
+
+        // OPEN
+        item.querySelector('.open-btn').onclick = () => {
+            openMap(map.id);
+        };
+
+        // RENAME
+        item.querySelector('.edit-btn').onclick = () => {
+            renameMap(map.id);
+        };
+
+        // DELETE
+        item.querySelector('.delete-btn').onclick = () => {
+            deleteMap(map.id);
+        };
+
+        mapList.appendChild(item);
+    });
+}
+
+function deleteMap(mapId) {
+
+    if (!confirm('Delete this map?')) return;
+
+    let maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+    maps = maps.filter(map => map.id != mapId);
+
+    localStorage.setItem('maps', JSON.stringify(maps));
+
+    renderMaps();
+}
+
+function renameMap(mapId) {
+
+    let maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+    const map = maps.find(m => m.id == mapId);
+
+    if (!map) return;
+
+    const newName = prompt('Enter new map name:', map.name);
+
+    if (!newName || !newName.trim()) return;
+
+    map.name = newName.trim();
+
+    localStorage.setItem('maps', JSON.stringify(maps));
+
+    renderMaps();
 }
 
 // Utility Functions

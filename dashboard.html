@@ -7,36 +7,105 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
     <div class="header-with-logout">
         <h1>Interactive map</h1>
-        <button class="btn btn-logout" onclick="logout()">Log out</button>
+        <button class="btn btn-logout" onclick="logout()">
+            Log out
+        </button>
     </div>
+
     <div class="container-dashboard">
+
+        <!-- MAPS -->
         <div class="dashboard-section">
             <h2>Your maps</h2>
-            <div class="map-list">
-                <div class="map-item" onclick="openMap(1)">1</div>
-                <div class="map-item" onclick="openMap(12)">12</div>
-                <div class="map-item" onclick="openMap(123)">123</div>
-                <button class="map-item create-item" onclick="createNewMap()">+ Create new map</button>
-            </div>
+
+            <!-- сюда JS будет добавлять карты -->
+            <div class="map-list" id="mapList"></div>
+
+            <!-- кнопка создания -->
+            <button class="map-item create-item" onclick="createNewMap()">
+                + Create new map
+            </button>
         </div>
+
+        <!-- GROUPS -->
         <div class="dashboard-section">
             <h2>Your groups</h2>
+
             <div class="group-list">
+
                 <div class="group-item" onclick="openGroupMap('map1')">
                     <span>map1</span>
                     <span class="badge">+1</span>
                 </div>
+
                 <div class="group-item" onclick="openGroupMap('map12')">
                     <span>map12</span>
                     <span class="badge">+3</span>
                 </div>
-                <button class="group-button" onclick="showCreateGroupModal()">+ Create new group code</button>
-                <button class="group-button join-button" onclick="showJoinGroupModal()">Join group</button>
+
+                <button class="group-button" onclick="showCreateGroupModal()">
+                    + Create new group code
+                </button>
+
+                <button class="group-button join-button" onclick="showJoinGroupModal()">
+                    Join group
+                </button>
+
             </div>
         </div>
+
     </div>
+
     <script src="script.js"></script>
+
+    <script>
+        function renderMaps() {
+
+const mapList = document.getElementById('mapList');
+
+if (!mapList) return;
+
+const maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+mapList.innerHTML = '';
+
+maps.forEach(map => {
+
+    const item = document.createElement('div');
+
+    item.className = 'map-item';
+
+    item.innerHTML = `
+        <div class="map-title">${map.name}</div>
+
+        <div class="map-actions">
+            <button class="map-btn open-btn">Open</button>
+            <button class="map-btn edit-btn">Rename</button>
+            <button class="map-btn delete-btn">Delete</button>
+        </div>
+    `;
+
+    item.querySelector('.open-btn').onclick = () => {
+        openMap(map.id);
+    };
+
+    item.querySelector('.edit-btn').onclick = () => {
+        renameMap(map.id);
+    };
+
+    item.querySelector('.delete-btn').onclick = () => {
+        deleteMap(map.id);
+    };
+
+    mapList.appendChild(item);
+});
+}
+
+        document.addEventListener('DOMContentLoaded', renderMaps);
+    </script>
+
 </body>
 </html>
