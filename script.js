@@ -188,16 +188,31 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     // Log event
     addEventLog('Map loaded successfully');
 }
+
 function loadMarkersForMap(mapId) {
+
+    markerData = [];
+    markers = [];
+
     const maps = JSON.parse(localStorage.getItem('maps')) || [];
+
     const currentMap = maps.find(m => m.id == mapId);
 
     if (!currentMap) return;
 
     currentMap.markers.forEach(data => {
-        addMarkerWithData({ lat: data.lat, lng: data.lng }, data);
+
+        // восстановление даты
+        data.added = new Date(data.added);
+
+        addMarkerWithData(
+            { lat: data.lat, lng: data.lng },
+            data,
+            false
+        );
     });
 }
+
 // Initialize Category Filters
 function initializeCategoryFilters() {
     const categorySelects = document.querySelectorAll('select');
@@ -276,9 +291,26 @@ function addSampleMarkers() {
     });
 }
 
+function saveCurrentMapMarkers() {
+    const mapId = getQueryParam('id');
+
+    let maps = JSON.parse(localStorage.getItem('maps')) || [];
+
+    const mapIndex = maps.findIndex(m => m.id == mapId);
+
+    if (mapIndex === -1) return;
+
+    maps[mapIndex].markers = markerData;
+
+    localStorage.setItem('maps', JSON.stringify(maps));
+}
+
+
+
+
 // Marker Functions
-function addMarkerWithData(latlng, data = null) {
-    // Default marker data
+function addMarkerWithData(latlng, data = null, save = true) {
+
     const markerInfo = data || {
         tag: 'Tag ' + (markerData.length + 1),
         desc: 'Description',
@@ -288,7 +320,6 @@ function addMarkerWithData(latlng, data = null) {
         lng: latlng.lng
     };
 
-    // Get color based on category
     const categoryColors = {
         'Parks': '#66bb6a',
         'Restaurants': '#ff7043',
@@ -307,38 +338,42 @@ function addMarkerWithData(latlng, data = null) {
         fillOpacity: 0.8
     }).addTo(map);
 
-    const markerIndex = markerData.length;
-    
     marker.on('click', function(e) {
+
         L.DomEvent.stopPropagation(e);
+    
+        const markerIndex = markers.indexOf(marker);
+    
+        if (markerIndex === -1) return;
+    
         if (currentMode === 'edit') {
+    
             showMarkerDetails(markerIndex);
             editMarkerDetails();
+    
         } else if (currentMode === 'delete') {
+    
             showMarkerDetails(markerIndex);
             deleteSelectedMarker();
+    
         } else {
+    
             showMarkerDetails(markerIndex);
         }
     });
 
     markerData.push(markerInfo);
     markers.push(marker);
+
     currentMode = 'view';
+
     addEventLog('New marker added: ' + markerInfo.tag);
-    
-    // Update search results
+
     updateSearchResults();
-   
-const mapId = getQueryParam('id');
-let maps = JSON.parse(localStorage.getItem('maps')) || [];
 
-const mapIndex = maps.findIndex(m => m.id == mapId);
-
-if (mapIndex !== -1) {
-    maps[mapIndex].markers.push(markerInfo);
-    localStorage.setItem('maps', JSON.stringify(maps));
-}
+    if (save) {
+        saveCurrentMapMarkers();
+    }
 }
 
 function addMarker(latlng) {
@@ -376,11 +411,11 @@ function deleteMarkerMode() {
     });
 }
 
-function deleteMarker() {
-    alert('Marker deleted');
-    addEventLog('Marker deleted');
-    updateSearchResults();
-}
+//function deleteMarker() {
+//    alert('Marker deleted');
+//    addEventLog('Marker deleted');
+//    updateSearchResults();
+//}
 
 // Show Marker Details with Edit Option
 function showMarkerDetails(index) {
@@ -414,6 +449,7 @@ function editMarkerDetails() {
     
     if (newTag !== null && newTag.trim()) {
         data.tag = newTag.trim();
+        saveCurrentMapMarkers();
         addEventLog(`Marker "${data.tag}" edited`);
         updateSearchResults();
     }
@@ -437,6 +473,8 @@ function deleteSelectedMarker() {
     const deletedTag = markerData[selectedMarkerIndex].tag;
     markerData.splice(selectedMarkerIndex, 1);
     markers.splice(selectedMarkerIndex, 1);
+
+    saveCurrentMapMarkers();
     selectedMarkerIndex = -1;
     
     const detailsDiv = document.querySelector('.marker-details');
@@ -584,7 +622,10 @@ function updateSearchResults() {
     markers.forEach((marker, index) => {
         if (markerData[index]) {
             const isInResults = results.includes(markerData[index]);
-            marker.setOpacity(isInResults ? 1 : 0.2);
+            marker.setStyle({
+                opacity: isInResults ? 1 : 0.2,
+                fillOpacity: isInResults ? 0.8 : 0.2
+            });
         }
     });
 }
@@ -773,3 +814,12 @@ function checkAuth() {
 
 // Run auth check on page load
 checkAuth();
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    if (document.getElementById('map')) {
+        initializeMap();
+    }
+
+    renderMaps();
+});
