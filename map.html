@@ -101,18 +101,23 @@
             <button class="control-item delete-marker" onclick="deleteMarkerMode()">Delete Marker</button>
         </div>
         
-        <div class="event-log">
+        <div class="event-log-container">
+
             <h3>Event log</h3>
-            <div class="log-entry">
-                <span>12:45</span>
-                <span>Tag: tag21 edited</span>
+        
+            <div class="event-log">
+                <div class="log-entry">
+                    <span>12:45</span>
+                    <span>Tag: tag21 edited</span>
+                </div>
+        
+                <div class="log-entry">
+                    <span>12:41</span>
+                    <span>New tag: tag21 added</span>
+                </div>
             </div>
-            <div class="log-entry">
-                <span>12:41</span>
-                <span>New tag: tag21 added</span>
-            </div>
+        
         </div>
-    </div>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>

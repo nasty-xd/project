@@ -507,17 +507,38 @@ function zoomOut() {
 // Event Log Function
 function addEventLog(event) {
     const now = new Date();
-    const time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+    const formatted = now.toLocaleString('en-GB', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
     const logEntry = {
-        time: time,
+        time: formatted,
         event: event
     };
+
     eventLog.push(logEntry);
-    
-    // Update event log display if exists
+
     updateEventLogDisplay();
     
-    console.log(time + ' - ' + event);
+
+    console.log(formatted + ' - ' + event);
+}
+
+
+function updateObjectControl(event) {
+    const container = document.querySelector('.object-control');
+
+    if (!container) return;
+
+    container.innerHTML = `
+        <div><strong>Last event:</strong></div>
+        <div>${event}</div>
+    `;
 }
 
 // Update Event Log Display
