@@ -1228,3 +1228,48 @@ body {
             0 0 6px rgba(0,0,0,0.45)
         );
 }
+
+.marker-popup-actions {
+
+    display: flex;
+    gap: 8px;
+
+    margin-top: 12px;
+}
+
+.popup-btn {
+
+    border: none;
+
+    padding:
+        8px 12px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    transition: 0.15s;
+}
+
+.popup-edit-btn {
+
+    background: #cac362;
+    color: white;
+}
+
+.popup-edit-btn:hover {
+    background: #cac362;
+}
+
+.popup-delete-btn {
+
+    background: #ef5350;
+    color: white;
+}
+
+.popup-delete-btn:hover {
+    background: #e53935;
+}

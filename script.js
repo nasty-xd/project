@@ -439,17 +439,72 @@ function saveMarkerFromModal() {
         const updated =
             markerData[selectedMarkerIndex];
 
-        const newMarker = L.circleMarker(
-            [updated.lat, updated.lng],
-            {
-                radius: 20,
-                fillColor: updated.color,
-                color: updated.color,
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.8
-            }
-        ).addTo(map);
+            const newMarker = L.marker(
+                [updated.lat, updated.lng],
+                {
+                    icon: createMarkerIcon(updated.color)
+                }
+            ).addTo(map);
+
+            newMarker.bindPopup(`
+
+                <div class="marker-popup">
+            
+                    <div class="marker-popup-title">
+                        ${updated.tag}
+                    </div>
+            
+                    <div class="marker-popup-desc">
+                        ${updated.desc || 'No description'}
+                    </div>
+            
+                    <div class="marker-popup-meta">
+                        <strong>Category:</strong>
+                        ${updated.category}
+                    </div>
+            
+                    <div class="marker-popup-meta">
+                        <strong>Added:</strong>
+                        ${formatDate(new Date(updated.added))}
+                    </div>
+            
+                    <div class="marker-popup-meta">
+                        <strong>Lat:</strong>
+                        ${updated.lat.toFixed(5)}
+                    </div>
+            
+                    <div class="marker-popup-meta">
+                        <strong>Lng:</strong>
+                        ${updated.lng.toFixed(5)}
+                    </div>
+            
+                    <div class="marker-popup-actions">
+            
+                        <button
+                            class="popup-btn popup-edit-btn"
+                            onclick="
+                                openMarkerPopupActions(${selectedMarkerIndex});
+                                editMarkerDetails();
+                            "
+                        >
+                            Edit
+                        </button>
+            
+                        <button
+                            class="popup-btn popup-delete-btn"
+                            onclick="
+                                openMarkerPopupActions(${selectedMarkerIndex});
+                                deleteSelectedMarker();
+                            "
+                        >
+                            Delete
+                        </button>
+            
+                    </div>
+            
+                </div>
+            
+            `);
 
         newMarker.on('click', function(e) {
 
@@ -661,28 +716,72 @@ function saveCurrentMapMarkers() {
 }
 
 
+function createMarkerIcon(color) {
 
+    // белый цвет плохо видно
+    const stroke =
+        color.toLowerCase() === '#ffffff'
+            ? '#888'
+            : '#ffffff';
+
+    const svg = `
+
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="38"
+            height="38"
+            viewBox="0 0 24 24"
+            fill="${color}"
+            stroke="${stroke}"
+            stroke-width="1.5"
+        >
+
+            <path d="
+                M12 22
+                S4 15
+                4 10
+                a8 8 0 1 1 16 0
+                c0 5-8 12-8 12z
+            "/>
+
+            <circle
+                cx="12"
+                cy="10"
+                r="3"
+                fill="white"
+            />
+
+        </svg>
+    `;
+
+    return L.icon({
+
+        iconUrl:
+            'data:image/svg+xml;charset=UTF-8,' +
+            encodeURIComponent(svg),
+
+        iconSize: [38, 38],
+        iconAnchor: [19, 38],
+        popupAnchor: [0, -32]
+    });
+}
+
+function openMarkerPopupActions(index) {
+
+    selectedMarkerIndex = index;
+
+    showMarkerDetails(index);
+}
 
 // Marker Functions
 function addMarkerWithData(latlng, data, save = true) {
 
     const color = data.color || '#66bb6a';
 
-    const marker = L.circleMarker(
+    const marker = L.marker(
         [latlng.lat, latlng.lng],
         {
-            radius: 14,
-    
-            fillColor: color,
-            color:
-                color === '#ffffff'
-                    ? '#888'
-                    : '#ffffff',
-    
-            weight: 3,
-    
-            opacity: 1,
-            fillOpacity: 1
+            icon: createMarkerIcon(color)
         }
     ).addTo(map);
     marker.bindPopup(`
@@ -715,6 +814,30 @@ function addMarkerWithData(latlng, data, save = true) {
             <div class="marker-popup-meta">
                 <strong>Lng:</strong>
                 ${data.lng.toFixed(5)}
+            </div>
+    
+            <div class="marker-popup-actions">
+    
+                <button
+                    class="popup-btn popup-edit-btn"
+                    onclick="
+                        openMarkerPopupActions(${markers.length});
+                        editMarkerDetails();
+                    "
+                >
+                    Edit
+                </button>
+    
+                <button
+                    class="popup-btn popup-delete-btn"
+                    onclick="
+                        openMarkerPopupActions(${markers.length});
+                        deleteSelectedMarker();
+                    "
+                >
+                    Delete
+                </button>
+    
             </div>
     
         </div>
@@ -1041,10 +1164,9 @@ function updateSearchResults() {
     markers.forEach((marker, index) => {
         if (markerData[index]) {
             const isInResults = results.includes(markerData[index]);
-            marker.setStyle({
-                opacity: isInResults ? 1 : 0.2,
-                fillOpacity: isInResults ? 0.8 : 0.2
-            });
+            marker.setOpacity(
+                isInResults ? 1 : 0.25
+            );
         }
     });
 }
