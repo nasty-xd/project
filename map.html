@@ -146,6 +146,8 @@
 
         <select id="markerCategorySelect">
         </select>
+
+        
         
         <input
             type="text"
@@ -154,6 +156,40 @@
             style="display:none;"
         >
         
+        <button
+    id="deleteCategoryBtn"
+    class="delete-category-btn"
+    onclick="deleteCurrentCategory()"
+>
+    Delete category
+</button>
+<button
+    id="renameCategoryBtn"
+    class="rename-category-btn"
+    onclick="toggleRenameCategory()"
+>
+    Rename category
+</button>
+
+<div
+    id="renameCategoryBlock"
+    style="display:none; margin-top:10px;"
+>
+
+    <input
+        type="text"
+        id="renameCategoryInput"
+        placeholder="New category name"
+    >
+
+    <button
+        onclick="renameCurrentCategory()"
+    >
+        Save rename
+    </button>
+
+</div>
+
         <div class="color-picker-block">
         
             <label for="markerColorInput">

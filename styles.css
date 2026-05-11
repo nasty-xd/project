@@ -1068,3 +1068,70 @@ body {
     border: none;
     border-radius: 6px;
 }
+
+
+.delete-category-btn {
+
+    border: none;
+
+    background: #fee2e2;
+
+    color: #dc2626;
+
+    padding: 10px;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+.delete-category-btn:hover {
+
+    background: #fecaca;
+}
+
+.delete-category-btn,
+.rename-category-btn {
+
+    width: 100%;
+
+    padding: 10px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    margin-top: 10px;
+
+    transition: 0.2s;
+}
+
+.delete-category-btn {
+
+    background: #d9534f;
+    color: white;
+}
+
+.delete-category-btn:hover {
+
+    background: #c9302c;
+}
+
+.rename-category-btn {
+
+    background: #4a90e2;
+    color: white;
+}
+
+.rename-category-btn:hover {
+
+    background: #357abd;
+}

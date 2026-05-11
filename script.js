@@ -3,7 +3,23 @@ let map = null;
 let markers = [];
 let currentMode = 'view'; // view, add, edit, delete
 let markerData = []; // Store marker data with properties
-let allCategories = ['Parks', 'Restaurants', 'Museums', 'Transport']; // Available categories
+const defaultCategories = [
+    'Parks',
+    'Restaurants',
+    'Museums',
+    'Transport'
+];
+
+let customCategories =
+    JSON.parse(
+        localStorage.getItem('customCategories')
+    ) || [];
+
+let allCategories = [
+    ...defaultCategories,
+    ...customCategories
+]; // Available categories
+
 let eventLog = []; // Store events
 let selectedMarkerIndex = -1; // Currently selected marker for editing
 let sortBy = 'name'; // Sort by: name, date, category
@@ -194,7 +210,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     addEventLog('Map loaded successfully');
 }
 
-function openMarkerModal() {
+function openMarkerModal(isEdit = false) {
 
     const modal = document.getElementById('markerModal');
 
@@ -205,10 +221,15 @@ function openMarkerModal() {
     document.getElementById('markerDescInput').value = '';
 
     updateColorPickerBorder();
+    updateCategorySelects();
+
+    
+
 
     document.getElementById(
         'markerModalTitle'
-    ).textContent = 'Create marker';
+    ).textContent =
+        isEdit ? 'Edit marker' : 'Create marker';
 
     modal.classList.remove('hidden');
 
@@ -222,14 +243,93 @@ document.getElementById(
 
     select.innerHTML = '';
 
+    const deleteBtn =
+    document.getElementById(
+        'deleteCategoryBtn'
+    );
+
+    select.onchange = function () {
+
+        const newCategoryInput =
+            document.getElementById(
+                'newCategoryInput'
+            );
+    
+        const deleteBtn =
+            document.getElementById(
+                'deleteCategoryBtn'
+            );
+    
+        const renameBtn =
+            document.getElementById(
+                'renameCategoryBtn'
+            );
+    
+        const renameBlock =
+            document.getElementById(
+                'renameCategoryBlock'
+            );
+    
+        // скрываем rename block всегда
+        renameBlock.style.display = 'none';
+    
+        // ======================
+        // NEW CATEGORY
+        // ======================
+    
+        if (this.value === '__new__') {
+    
+            newCategoryInput.style.display =
+                'block';
+    
+            deleteBtn.style.display =
+                'none';
+    
+            renameBtn.style.display =
+                'none';
+    
+            return;
+        }
+    
+        // ======================
+        // NORMAL CATEGORY
+        // ======================
+    
+        newCategoryInput.style.display =
+            'none';
+    
+        // default category
+        if (
+            defaultCategories.includes(
+                this.value
+            )
+        ) {
+    
+            deleteBtn.style.display =
+                'none';
+    
+            renameBtn.style.display =
+                'none';
+    
+        } else {
+    
+            deleteBtn.style.display =
+                'block';
+    
+            renameBtn.style.display =
+                'block';
+        }
+    };
+
+
     // категории
     allCategories.forEach(cat => {
 
         const option = document.createElement('option');
-
+    
         option.value = cat;
         option.textContent = cat;
-
+    
         select.appendChild(option);
     });
 
@@ -241,22 +341,14 @@ document.getElementById(
 
     select.appendChild(addOption);
 
+    select.dispatchEvent(
+        new Event('change')
+    );
     // скрываем input
     document.getElementById(
         'newCategoryInput'
     ).style.display = 'none';
 
-    select.onchange = function() {
-
-        const input =
-            document.getElementById('newCategoryInput');
-
-        if (this.value === '__new__') {
-            input.style.display = 'block';
-        } else {
-            input.style.display = 'none';
-        }
-    };
 }
 
 function closeMarkerModal() {
@@ -308,6 +400,14 @@ function saveMarkerFromModal() {
         }
 
         if (!allCategories.includes(category)) {
+
+            customCategories.push(category);
+        
+            localStorage.setItem(
+                'customCategories',
+                JSON.stringify(customCategories)
+            );
+        
             allCategories.push(category);
         }
     }
@@ -424,6 +524,48 @@ function loadMarkersForMap(mapId) {
         );
     });
 }
+
+
+function updateCategorySelects() {
+
+    const select = document.getElementById('markerCategorySelect');
+
+    if (!select) return;
+
+    const currentValue = select.value;
+
+    select.innerHTML = '';
+
+    // категории
+    allCategories.forEach(category => {
+
+        const option = document.createElement('option');
+
+        option.value = category;
+        option.textContent = category;
+
+        select.appendChild(option);
+    });
+
+    // ➕ Add new category
+    const addOption = document.createElement('option');
+
+    addOption.value = '__new__';
+    addOption.textContent = '+ Add new category';
+
+    select.appendChild(addOption);
+
+    // восстановление выбранной категории
+    if (allCategories.includes(currentValue)) {
+        select.value = currentValue;
+    }
+
+    // обновляем UI
+    select.dispatchEvent(
+        new Event('change')
+    );
+}
+
 
 // Initialize Category Filters
 function initializeCategoryFilters() {
@@ -641,10 +783,10 @@ function editMarkerDetails() {
     document.getElementById(
         'markerModalTitle'
     ).textContent = 'Edit marker';
-    
+
     const data = markerData[selectedMarkerIndex];
 
-    openMarkerModal();
+    openMarkerModal(true);
 
     document.getElementById(
         'markerNameInput'
@@ -665,6 +807,9 @@ function editMarkerDetails() {
         );
 
     select.value = data.category;
+    select.dispatchEvent(
+        new Event('change')
+    );
 }
 
 function deleteSelectedMarker() {
@@ -1085,3 +1230,227 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderMaps();
 });
+
+
+
+function deleteCurrentCategory() {
+
+    const select =
+        document.getElementById(
+            'markerCategorySelect'
+        );
+
+    const category = select.value;
+
+    if (
+        defaultCategories.includes(category)
+    ) {
+        alert(
+            'Default categories cannot be deleted'
+        );
+        return;
+    }
+
+    if (
+        category === '__new__'
+    ) return;
+
+    if (
+        !confirm(
+            `Delete category "${category}"?`
+        )
+    ) {
+        return;
+    }
+
+    customCategories =
+        customCategories.filter(
+            c => c !== category
+        );
+
+    syncCategories();
+
+    markerData.forEach(marker => {
+
+        if (
+            marker.category === category
+        ) {
+            marker.category = 'Parks';
+        }
+    });
+
+    saveCurrentMapMarkers();
+
+    updateCategorySelects();
+
+    updateSearchResults();
+
+    addEventLog(
+        `Category "${category}" deleted`
+    );
+
+    select.value = 'Parks';
+
+    select.dispatchEvent(
+        new Event('change')
+    );
+}
+
+
+function syncCategories() {
+    allCategories = [
+        ...defaultCategories,
+        ...customCategories
+    ];
+
+    localStorage.setItem(
+        'customCategories',
+        JSON.stringify(customCategories)
+    );
+}
+
+function refreshAllCategoryUI() {
+    updateCategorySelects();
+    initializeCategoryFilters();
+    updateSearchResults();
+}
+
+
+function deleteCategory(category) {
+
+    customCategories =
+        customCategories.filter(c => c !== category);
+
+    localStorage.setItem(
+        'customCategories',
+        JSON.stringify(customCategories)
+    );
+
+    allCategories = [
+        ...defaultCategories,
+        ...customCategories
+    ];
+
+    // обновить маркеры
+    markerData.forEach(m => {
+        if (m.category === category) {
+            m.category = 'Parks';
+        }
+    });
+
+    saveCurrentMapMarkers();
+
+    updateCategorySelects();
+    updateSearchResults();
+    addEventLog(`Category "${category}" deleted`);
+}
+
+function renameCurrentCategory() {
+
+    const select =
+        document.getElementById(
+            'markerCategorySelect'
+        );
+
+    const oldName = select.value;
+
+    const input =
+        document.getElementById(
+            'renameCategoryInput'
+        );
+
+    const newName =
+        input.value.trim();
+
+    if (!newName) {
+        alert('Enter new category name');
+        return;
+    }
+
+    if (
+        allCategories.includes(newName)
+    ) {
+        alert('Category already exists');
+        return;
+    }
+
+    customCategories =
+        customCategories.map(c =>
+            c === oldName ? newName : c
+        );
+
+    markerData.forEach(marker => {
+
+        if (
+            marker.category === oldName
+        ) {
+            marker.category = newName;
+        }
+    });
+
+    syncCategories();
+
+    saveCurrentMapMarkers();
+
+    updateCategorySelects();
+
+    updateSearchResults();
+
+    addEventLog(
+        `Category renamed: "${oldName}" → "${newName}"`
+    );
+
+    select.value = newName;
+
+    select.dispatchEvent(
+        new Event('change')
+    );
+
+    document.getElementById(
+        'renameCategoryBlock'
+    ).style.display = 'none';
+}
+
+
+function toggleRenameCategory() {
+
+    const block =
+        document.getElementById(
+            'renameCategoryBlock'
+        );
+
+    const select =
+        document.getElementById(
+            'markerCategorySelect'
+        );
+
+    const category = select.value;
+
+    if (
+        defaultCategories.includes(category)
+    ) {
+        alert(
+            'Default categories cannot be renamed'
+        );
+        return;
+    }
+
+    if (category === '__new__') {
+        return;
+    }
+
+    if (
+        block.style.display === 'none'
+    ) {
+
+        block.style.display = 'block';
+
+        document.getElementById(
+            'renameCategoryInput'
+        ).value = category;
+
+    } else {
+
+        block.style.display = 'none';
+    }
+}
