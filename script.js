@@ -204,6 +204,18 @@ function openMarkerModal() {
     document.getElementById('markerNameInput').value = '';
     document.getElementById('markerDescInput').value = '';
 
+    updateColorPickerBorder();
+
+    document.getElementById(
+        'markerModalTitle'
+    ).textContent = 'Create marker';
+
+    modal.classList.remove('hidden');
+
+document.getElementById(
+    'markerColorInput'
+).oninput = updateColorPickerBorder;
+
     const select = document.getElementById(
         'markerCategorySelect'
     );
@@ -626,6 +638,10 @@ function editMarkerDetails() {
 
     editMode = true;
 
+    document.getElementById(
+        'markerModalTitle'
+    ).textContent = 'Edit marker';
+    
     const data = markerData[selectedMarkerIndex];
 
     openMarkerModal();
@@ -641,6 +657,7 @@ function editMarkerDetails() {
     document.getElementById(
         'markerColorInput'
     ).value = data.color || '#66bb6a';
+    updateColorPickerBorder();
 
     const select =
         document.getElementById(
@@ -1027,6 +1044,35 @@ function checkAuth() {
         }
     }
 }
+
+function updateColorPickerBorder() {
+
+    const picker =
+        document.getElementById(
+            'markerColorInput'
+        );
+
+    if (!picker) return;
+
+    const color = picker.value.toLowerCase();
+
+    // если чёрный
+    if (
+        color === '#000000' ||
+        color === '#000'
+    ) {
+
+        picker.style.border =
+            '2px solid gray';
+
+    } else {
+
+        picker.style.border =
+            '2px solid black';
+    }
+}
+
+
 
 // Run auth check on page load
 checkAuth();
