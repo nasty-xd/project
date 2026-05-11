@@ -1256,17 +1256,17 @@ body {
 
 .popup-edit-btn {
 
-    background: #cac362;
+    background: #ffb300;
     color: white;
 }
 
 .popup-edit-btn:hover {
-    background: #cac362;
+    background: #ffb300;
 }
 
 .popup-delete-btn {
 
-    background: #ef5350;
+    background: #e53935;
     color: white;
 }
 
