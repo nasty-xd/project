@@ -7,6 +7,8 @@ let allCategories = ['Parks', 'Restaurants', 'Museums', 'Transport']; // Availab
 let eventLog = []; // Store events
 let selectedMarkerIndex = -1; // Currently selected marker for editing
 let sortBy = 'name'; // Sort by: name, date, category
+let pendingLatLng = null;
+let editMode = false;
 
 // Navigation Functions
 function navigateTo(page) {
@@ -180,14 +182,212 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
     // Handle map clicks for adding markers
     map.on('click', function(e) {
-        if (currentMode === 'add') {
-            addMarkerWithData(e.latlng);
-        }
+
+        if (currentMode !== 'add') return;
+    
+        pendingLatLng = e.latlng;
+    
+        openMarkerModal();
     });
 
     // Log event
     addEventLog('Map loaded successfully');
 }
+
+function openMarkerModal() {
+
+    const modal = document.getElementById('markerModal');
+
+    modal.classList.remove('hidden');
+
+    // очистка
+    document.getElementById('markerNameInput').value = '';
+    document.getElementById('markerDescInput').value = '';
+
+    const select = document.getElementById(
+        'markerCategorySelect'
+    );
+
+    select.innerHTML = '';
+
+    // категории
+    allCategories.forEach(cat => {
+
+        const option = document.createElement('option');
+
+        option.value = cat;
+        option.textContent = cat;
+
+        select.appendChild(option);
+    });
+
+    // добавить новую
+    const addOption = document.createElement('option');
+
+    addOption.value = '__new__';
+    addOption.textContent = '+ Add new category';
+
+    select.appendChild(addOption);
+
+    // скрываем input
+    document.getElementById(
+        'newCategoryInput'
+    ).style.display = 'none';
+
+    select.onchange = function() {
+
+        const input =
+            document.getElementById('newCategoryInput');
+
+        if (this.value === '__new__') {
+            input.style.display = 'block';
+        } else {
+            input.style.display = 'none';
+        }
+    };
+}
+
+function closeMarkerModal() {
+
+    document
+        .getElementById('markerModal')
+        .classList.add('hidden');
+}
+
+function saveMarkerFromModal() {
+
+    const name =
+        document.getElementById(
+            'markerNameInput'
+        ).value.trim();
+
+    const desc =
+        document.getElementById(
+            'markerDescInput'
+        ).value.trim();
+
+    if (!name) {
+            alert('Enter marker name');
+            return;
+        }
+        
+    if (!desc) {
+            alert('Enter marker description');
+            return;
+        }
+
+    const select =
+        document.getElementById(
+            'markerCategorySelect'
+        );
+
+    let category = select.value;
+
+    if (category === '__new__') {
+
+        category =
+            document.getElementById(
+                'newCategoryInput'
+            ).value.trim();
+
+        if (!category) {
+            alert('Enter category name');
+            return;
+        }
+
+        if (!allCategories.includes(category)) {
+            allCategories.push(category);
+        }
+    }
+
+    const color =
+        document.getElementById(
+            'markerColorInput'
+        ).value;
+
+    // =========================
+    // EDIT
+    // =========================
+
+    if (editMode) {
+
+        const oldMarker =
+            markers[selectedMarkerIndex];
+
+        map.removeLayer(oldMarker);
+
+        markerData[selectedMarkerIndex] = {
+            ...markerData[selectedMarkerIndex],
+            tag: name,
+            desc: desc,
+            category: category,
+            color: color
+        };
+
+        const updated =
+            markerData[selectedMarkerIndex];
+
+        const newMarker = L.circleMarker(
+            [updated.lat, updated.lng],
+            {
+                radius: 20,
+                fillColor: updated.color,
+                color: updated.color,
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }
+        ).addTo(map);
+
+        newMarker.on('click', function(e) {
+
+            L.DomEvent.stopPropagation(e);
+
+            const markerIndex =
+                markers.indexOf(newMarker);
+
+            showMarkerDetails(markerIndex);
+        });
+
+        markers[selectedMarkerIndex] = newMarker;
+
+        saveCurrentMapMarkers();
+
+        updateSearchResults();
+
+        addEventLog(
+            `Marker "${updated.tag}" updated`
+        );
+
+        editMode = false;
+
+        closeMarkerModal();
+
+        return;
+    }
+
+    // =========================
+    // CREATE
+    // =========================
+
+    addMarkerWithData(
+        pendingLatLng,
+        {
+            tag: name || 'New marker',
+            desc: desc,
+            category: category,
+            color: color,
+            added: new Date(),
+            lat: pendingLatLng.lat,
+            lng: pendingLatLng.lng
+        }
+    );
+
+    closeMarkerModal();
+}
+
+
+
 
 function loadMarkersForMap(mapId) {
 
@@ -310,69 +510,9 @@ function saveCurrentMapMarkers() {
 
 
 // Marker Functions
-function addMarkerWithData(latlng, data = null, save = true) {
+function addMarkerWithData(latlng, data, save = true) {
 
-    // =========================
-    // СОЗДАНИЕ НОВОЙ МЕТКИ
-    // =========================
-
-    if (!data) {
-
-        let tag = prompt('Enter marker name:', 'New marker');
-
-        if (tag === null) return;
-
-        let desc = prompt('Enter description:', '');
-
-        if (desc === null) desc = '';
-
-        // выбор категории
-        let category = prompt(
-            'Enter category:\n\nExisting:\n' +
-            allCategories.join(', '),
-            allCategories[0]
-        );
-
-        if (!category || !category.trim()) {
-            category = 'Other';
-        }
-
-        category = category.trim();
-
-        // если категории ещё нет → добавляем
-        if (!allCategories.includes(category)) {
-            allCategories.push(category);
-        }
-
-        data = {
-            tag: tag,
-            desc: desc,
-            category: category,
-            added: new Date(),
-            lat: latlng.lat,
-            lng: latlng.lng
-        };
-    }
-
-    // =========================
-    // ЦВЕТА КАТЕГОРИЙ
-    // =========================
-
-    const categoryColors = {
-        Parks: '#66bb6a',
-        Restaurants: '#ff7043',
-        Museums: '#42a5f5',
-        Transport: '#ab47bc',
-        Other: '#999999'
-    };
-
-    const color =
-        categoryColors[data.category] ||
-        '#' + Math.floor(Math.random()*16777215).toString(16);
-
-    // =========================
-    // СОЗДАНИЕ МАРКЕРА
-    // =========================
+    const color = data.color || '#66bb6a';
 
     const marker = L.circleMarker(
         [latlng.lat, latlng.lng],
@@ -398,8 +538,6 @@ function addMarkerWithData(latlng, data = null, save = true) {
     markerData.push(data);
     markers.push(marker);
 
-    currentMode = 'view';
-    initializeCategoryFilters();
     updateSearchResults();
 
     if (save) {
@@ -407,7 +545,7 @@ function addMarkerWithData(latlng, data = null, save = true) {
         saveCurrentMapMarkers();
 
         addEventLog(
-            `Marker "${data.tag}" added (${data.category})`
+            `Marker "${data.tag}" added`
         );
     }
 }
@@ -461,7 +599,12 @@ function showMarkerDetails(index) {
         document.getElementById('dateAdded').textContent = formatDate(data.added);
         document.getElementById('markerLat').textContent = data.lat.toFixed(7);
         document.getElementById('markerLon').textContent = data.lng.toFixed(7);
-        
+        document.querySelector(
+            '.btn-secondary'
+        ).onclick = () => {
+            editMarkerDetails();
+        };
+
         const detailsDiv = document.querySelector('.marker-details');
         if (detailsDiv) {
             detailsDiv.classList.add('active');
@@ -481,72 +624,30 @@ function editMarkerDetails() {
         return;
     }
 
+    editMode = true;
+
     const data = markerData[selectedMarkerIndex];
 
-    // название
-    const newTag = prompt(
-        'Edit marker name:',
-        data.tag
-    );
+    openMarkerModal();
 
-    if (newTag === null) return;
+    document.getElementById(
+        'markerNameInput'
+    ).value = data.tag;
 
-    // описание
-    const newDesc = prompt(
-        'Edit description:',
-        data.desc
-    );
+    document.getElementById(
+        'markerDescInput'
+    ).value = data.desc;
 
-    if (newDesc === null) return;
+    document.getElementById(
+        'markerColorInput'
+    ).value = data.color || '#66bb6a';
 
-    // категория
-    const newCategory = prompt(
-        'Edit category:\n\nExisting:\n' +
-        allCategories.join(', '),
-        data.category
-    );
+    const select =
+        document.getElementById(
+            'markerCategorySelect'
+        );
 
-    if (newCategory === null) return;
-
-    const category = newCategory.trim() || 'Other';
-
-    // новая категория
-    if (!allCategories.includes(category)) {
-        allCategories.push(category);
-    }
-
-    // обновляем данные
-    data.tag = newTag.trim();
-    data.desc = newDesc.trim();
-    data.category = category;
-
-    // сохраняем
-    saveCurrentMapMarkers();
-
-    // ПЕРЕРИСОВКА КАРТЫ
-    const oldMarker = markers[selectedMarkerIndex];
-
-    map.removeLayer(oldMarker);
-
-    markers.splice(selectedMarkerIndex, 1);
-    markerData.splice(selectedMarkerIndex, 1);
-
-    addMarkerWithData(
-        {
-            lat: data.lat,
-            lng: data.lng
-        },
-        data,
-        false
-    );
-
-    saveCurrentMapMarkers();
-    initializeCategoryFilters();
-    updateSearchResults();
-
-    addEventLog(
-        `Marker updated: "${data.tag}"`
-    );
+    select.value = data.category;
 }
 
 function deleteSelectedMarker() {

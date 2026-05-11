@@ -125,6 +125,59 @@
         initializeMap();
     </script>
 
-    
+<div id="markerModal" class="marker-modal hidden">
+
+    <div class="marker-modal-content">
+
+        <h3>Create marker</h3>
+
+        <input
+            type="text"
+            id="markerNameInput"
+            placeholder="Marker name"
+        >
+
+        <textarea
+            id="markerDescInput"
+            placeholder="Description"
+        ></textarea>
+
+        <select id="markerCategorySelect">
+        </select>
+        
+        <input
+            type="text"
+            id="newCategoryInput"
+            placeholder="New category"
+            style="display:none;"
+        >
+        
+        <div class="color-picker-block">
+        
+            <label for="markerColorInput">
+                Marker color:
+            </label>
+        
+            <input
+                type="color"
+                id="markerColorInput"
+                value="#66bb6a"
+            >
+        
+        </div>
+
+        <div class="modal-buttons">
+            <button onclick="saveMarkerFromModal()">
+                Save
+            </button>
+
+            <button onclick="closeMarkerModal()">
+                Cancel
+            </button>
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>

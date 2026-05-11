@@ -805,3 +805,70 @@ body {
 .back-btn:active {
     transform: scale(0.98);
 }
+
+
+.marker-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+.hidden {
+    display: none;
+}
+
+.marker-modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+
+    width: 320px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.marker-modal-content input,
+.marker-modal-content textarea,
+.marker-modal-content select {
+    padding: 10px;
+}
+
+.color-picker-block {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+#markerColorInput {
+
+    width: 70px;
+    height: 45px;
+
+    border: none;
+    background: none;
+
+    cursor: pointer;
+    padding: 0;
+}
+
+#markerColorInput::-webkit-color-swatch {
+
+    border: none;
+    border-radius: 8px;
+}
+
+#markerColorInput::-webkit-color-swatch-wrapper {
+
+    padding: 0;
+}
