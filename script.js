@@ -1008,40 +1008,134 @@ function updateSearchResults() {
     });
 }
 
-// Update Found Tags Display with Sorting
+// Update Found Tags Display with REAL marker colors + description
 function updateFoundTagsDisplay(results) {
-    const foundTagsDiv = document.querySelector('.found-tags');
+
+    const foundTagsDiv =
+        document.querySelector('.found-tags');
+
     if (!foundTagsDiv) return;
-    
-    // Remove existing tag items (but keep heading and sort buttons)
-    const tagItems = foundTagsDiv.querySelectorAll('.tag-item');
-    tagItems.forEach(item => item.remove());
-    
-    // Sort results
+
+    // удалить старые элементы
+    const oldItems =
+        foundTagsDiv.querySelectorAll('.tag-item');
+
+    oldItems.forEach(item => item.remove());
+
+    // сортировка
     const sorted = sortResults(results);
-    
-    // Add new tag items
-    sorted.forEach((marker, displayIndex) => {
-        const markerIndex = markerData.indexOf(marker);
-        const tagDiv = document.createElement('div');
-        const colorClass = marker.category === 'Parks' ? 'tag-1' : 
-                          marker.category === 'Restaurants' ? 'tag-rest' :
-                          marker.category === 'Museums' ? 'tag-mus' : 'tag-trans';
-        tagDiv.className = `tag-item ${colorClass}`;
+
+    sorted.forEach(marker => {
+
+        const markerIndex =
+            markerData.indexOf(marker);
+
+        const tagDiv =
+            document.createElement('div');
+
+        tagDiv.className = 'tag-item';
+
+        // ✅ настоящий цвет маркера
+        const markerColor =
+            marker.color || '#66bb6a';
+
+        // основной стиль карточки
+tagDiv.style.background = '#1e1e1e';
+
+tagDiv.style.border =
+    `2px solid ${markerColor}`;
+
+// белый цвет плохо видно
+if (
+    markerColor.toLowerCase() === '#ffffff' ||
+    markerColor.toLowerCase() === '#fff'
+) {
+    tagDiv.style.border =
+        '2px solid #888';
+}
+
         tagDiv.innerHTML = `
-            <div><strong>${marker.tag}</strong> (${marker.category})</div>
-            <div class="tag-date">Added: ${formatDate(marker.added)}</div>
-            <div class="tag-coords">La: ${marker.lat.toFixed(7)}<br>Lo: ${marker.lng.toFixed(7)}</div>
+
+            <div class="tag-header">
+
+    <span
+        class="tag-color-dot"
+        style="
+            background:${markerColor};
+            border:
+                ${markerColor === '#ffffff'
+                    ? '1px solid #666'
+                    : 'none'};
+        "
+    ></span>
+
+    <strong>${marker.tag}</strong>
+
+</div>
+
+            <!-- ✅ описание -->
+            <div class="tag-description">
+                ${marker.desc || 'No description'}
+            </div>
+
+            <div class="tag-category">
+                ${marker.category}
+            </div>
+
+            <div class="tag-date">
+                Added: ${formatDate(marker.added)}
+            </div>
+
+            <div class="tag-coords">
+                La: ${marker.lat.toFixed(7)}
+                <br>
+                Lo: ${marker.lng.toFixed(7)}
+            </div>
+
             <div class="tag-actions">
-                <button class="tag-btn edit-btn" onclick="showMarkerDetails(${markerIndex}); editMarkerDetails()">Edit</button>
-                <button class="tag-btn delete-btn" onclick="showMarkerDetails(${markerIndex}); deleteSelectedMarker()">Delete</button>
+
+                <button
+                    class="tag-btn edit-btn"
+                    onclick="
+                        showMarkerDetails(${markerIndex});
+                        editMarkerDetails();
+                    "
+                >
+                    Edit
+                </button>
+
+                <button
+                    class="tag-btn delete-btn"
+                    onclick="
+                        showMarkerDetails(${markerIndex});
+                        deleteSelectedMarker();
+                    "
+                >
+                    Delete
+                </button>
+
             </div>
         `;
+
+        // клик по карточке
         tagDiv.onclick = (e) => {
-            if (!e.target.classList.contains('tag-btn')) {
+
+            if (
+                !e.target.classList.contains('tag-btn')
+            ) {
+
                 showMarkerDetails(markerIndex);
+
+                map.flyTo(
+                    [marker.lat, marker.lng],
+                    9,
+                    {
+                        duration: 1.2
+                    }
+                );
             }
         };
+
         foundTagsDiv.appendChild(tagDiv);
     });
 }
