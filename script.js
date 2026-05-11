@@ -671,14 +671,55 @@ function addMarkerWithData(latlng, data, save = true) {
     const marker = L.circleMarker(
         [latlng.lat, latlng.lng],
         {
-            radius: 20,
+            radius: 14,
+    
             fillColor: color,
-            color: color,
-            weight: 2,
+            color:
+                color === '#ffffff'
+                    ? '#888'
+                    : '#ffffff',
+    
+            weight: 3,
+    
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 1
         }
     ).addTo(map);
+    marker.bindPopup(`
+
+        <div class="marker-popup">
+    
+            <div class="marker-popup-title">
+                ${data.tag}
+            </div>
+    
+            <div class="marker-popup-desc">
+                ${data.desc || 'No description'}
+            </div>
+    
+            <div class="marker-popup-meta">
+                <strong>Category:</strong>
+                ${data.category}
+            </div>
+    
+            <div class="marker-popup-meta">
+                <strong>Added:</strong>
+                ${formatDate(new Date(data.added))}
+            </div>
+    
+            <div class="marker-popup-meta">
+                <strong>Lat:</strong>
+                ${data.lat.toFixed(5)}
+            </div>
+    
+            <div class="marker-popup-meta">
+                <strong>Lng:</strong>
+                ${data.lng.toFixed(5)}
+            </div>
+    
+        </div>
+    
+    `);
 
     marker.on('click', function(e) {
 

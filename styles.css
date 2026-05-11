@@ -1190,3 +1190,41 @@ body {
 .tag-actions {
     margin-top: 10px;
 }
+
+.marker-popup-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.marker-popup-desc {
+    font-size: 13px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+}
+
+.marker-popup-meta {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+/* marker hover */
+
+.leaflet-interactive {
+
+    transition:
+        stroke 0.15s,
+        stroke-width 0.15s,
+        filter 0.15s;
+}
+
+.leaflet-interactive:hover {
+
+    stroke-width: 5;
+
+    filter:
+        drop-shadow(
+            0 0 6px rgba(0,0,0,0.45)
+        );
+}
