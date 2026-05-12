@@ -34,27 +34,21 @@
         <div class="dashboard-section">
             <h2>Your groups</h2>
 
-            <div class="group-list">
+            <div class="map-list" id="groupList"></div>
 
-                <div class="group-item" onclick="openGroupMap('map1')">
-                    <span>map1</span>
-                    <span class="badge">+1</span>
-                </div>
+<button
+    class="map-item create-item"
+    onclick="showCreateGroupModal()"
+>
+    + Create new group
+</button>
 
-                <div class="group-item" onclick="openGroupMap('map12')">
-                    <span>map12</span>
-                    <span class="badge">+3</span>
-                </div>
-
-                <button class="group-button" onclick="showCreateGroupModal()">
-                    + Create new group code
-                </button>
-
-                <button class="group-button join-button" onclick="showJoinGroupModal()">
-                    Join group
-                </button>
-
-            </div>
+<button
+    class="map-item create-item"
+    onclick="showJoinGroupModal()"
+>
+    + Join group
+</button>
         </div>
 
     </div>

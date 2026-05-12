@@ -128,8 +128,28 @@ if (createMapForm) {
     if (createGroupForm) {
         createGroupForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Group map created successfully!');
-            window.location.href = 'dashboard.html';
+            const groupName =
+    document.querySelector('input').value.trim()
+    || 'Untitled group';
+
+let groups =
+    JSON.parse(
+        localStorage.getItem('groups')
+    ) || [];
+
+const newGroup = {
+    id: Date.now(),
+    name: groupName
+};
+
+groups.unshift(newGroup);
+
+localStorage.setItem(
+    'groups',
+    JSON.stringify(groups)
+);
+
+window.location.href = 'dashboard.html';
         });
     }
 
@@ -1393,6 +1413,7 @@ function deleteMap(mapId) {
     localStorage.setItem('maps', JSON.stringify(maps));
 
     renderMaps();
+    renderGroups();
 }
 
 function renameMap(mapId) {
@@ -1412,6 +1433,7 @@ function renameMap(mapId) {
     localStorage.setItem('maps', JSON.stringify(maps));
 
     renderMaps();
+    renderGroups();
 }
 
 function loadMapTitle(mapId) {
@@ -1486,6 +1508,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     renderMaps();
+    renderGroups();
 });
 
 
@@ -1710,4 +1733,118 @@ function toggleRenameCategory() {
 
         block.style.display = 'none';
     }
+}
+
+
+function renderGroups() {
+
+    const groupList =
+        document.getElementById('groupList');
+
+    if (!groupList) return;
+
+    const groups =
+        JSON.parse(
+            localStorage.getItem('groups')
+        ) || [];
+
+    groupList.innerHTML = '';
+
+    groups.forEach(group => {
+
+        const item =
+            document.createElement('div');
+
+        item.className = 'map-item';
+
+        item.innerHTML = `
+
+            <div class="map-title">
+                ${group.name}
+            </div>
+
+            <div class="map-actions">
+
+                <button class="map-btn open-btn">
+                    Open
+                </button>
+
+                <button class="map-btn edit-btn">
+                    Rename
+                </button>
+
+                <button class="map-btn delete-btn">
+                    Delete
+                </button>
+
+            </div>
+        `;
+
+        // OPEN
+        item.querySelector('.open-btn').onclick = () => {
+            openGroupMap(group.name);
+        };
+
+        // RENAME
+        item.querySelector('.edit-btn').onclick = () => {
+            renameGroup(group.id);
+        };
+
+        // DELETE
+        item.querySelector('.delete-btn').onclick = () => {
+            deleteGroup(group.id);
+        };
+
+        groupList.appendChild(item);
+    });
+}
+
+function deleteGroup(groupId) {
+
+    if (!confirm('Delete this group?')) return;
+
+    let groups =
+        JSON.parse(
+            localStorage.getItem('groups')
+        ) || [];
+
+    groups = groups.filter(
+        group => group.id != groupId
+    );
+
+    localStorage.setItem(
+        'groups',
+        JSON.stringify(groups)
+    );
+
+    renderGroups();
+}
+
+function renameGroup(groupId) {
+
+    let groups =
+        JSON.parse(
+            localStorage.getItem('groups')
+        ) || [];
+
+    const group =
+        groups.find(g => g.id == groupId);
+
+    if (!group) return;
+
+    const newName = prompt(
+        'Enter new group name:',
+        group.name
+    );
+
+    if (!newName || !newName.trim()) return;
+
+    group.name = newName.trim();
+
+    localStorage.setItem(
+        'groups',
+        JSON.stringify(groups)
+    );
+
+    renderGroups();
 }
