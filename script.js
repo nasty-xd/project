@@ -32,9 +32,19 @@ function navigateTo(page) {
 }
 
 function logout() {
-    if (confirm('Are you sure you want to log out?')) {
-        sessionStorage.clear();
-        window.location.href = 'index.html';
+
+    if (
+        confirm(
+            'Are you sure you want to log out?'
+        )
+    ) {
+
+        localStorage.removeItem('token');
+
+        localStorage.removeItem('currentUser');
+
+        window.location.href =
+            'index.html';
     }
 }
 
@@ -72,32 +82,136 @@ function showJoinGroupModal() {
 // Form Submissions and Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     const signinForm = document.getElementById('signinForm');
-    if (signinForm) {
-        signinForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Simulate login
-            sessionStorage.setItem('user', 'user123');
-            window.location.href = 'dashboard.html';
-        });
-    }
 
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const password = document.querySelectorAll('input[type="password"]')[0].value;
-            const confirmation = document.querySelectorAll('input[type="password"]')[1].value;
-            
-            if (password !== confirmation) {
-                alert('Passwords do not match!');
+if (signinForm) {
+
+    signinForm.addEventListener('submit', async function(e) {
+
+        e.preventDefault();
+
+        const username =
+            document.querySelector('input[type="text"]').value;
+
+        const password =
+            document.querySelector('input[type="password"]').value;
+
+        try {
+
+            const response = await fetch(
+                'http://localhost:3000/api/auth/login',
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                alert(data.message);
+
                 return;
             }
-            
-            // Simulate registration
-            sessionStorage.setItem('user', 'newuser123');
-            window.location.href = 'dashboard.html';
-        });
-    }
+
+            localStorage.setItem(
+                'token',
+                data.token
+            );
+
+            localStorage.setItem(
+                'currentUser',
+                JSON.stringify(data.user)
+            );
+
+            window.location.href =
+                'dashboard.html';
+
+        } catch (err) {
+
+            console.log(err);
+
+            alert('Server error');
+        }
+    });
+}
+
+const loginForm = document.getElementById('loginForm');
+
+if (loginForm) {
+
+    loginForm.addEventListener('submit', async function(e) {
+
+        e.preventDefault();
+
+        const username =
+            document.querySelector('input[type="text"]').value;
+
+        const password =
+            document.querySelectorAll(
+                'input[type="password"]'
+            )[0].value;
+
+        const confirmation =
+            document.querySelectorAll(
+                'input[type="password"]'
+            )[1].value;
+
+        if (password !== confirmation) {
+
+            alert('Passwords do not match');
+
+            return;
+        }
+
+        try {
+
+            const response = await fetch(
+                'http://localhost:3000/api/auth/register',
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                alert(data.message);
+
+                return;
+            }
+
+            alert('User created');
+
+            window.location.href =
+                'index.html';
+
+        } catch (err) {
+
+            console.log(err);
+
+            alert('Server error');
+        }
+    });
+}
 
     const createMapForm = document.getElementById('createMapForm');
 if (createMapForm) {
@@ -1459,12 +1573,30 @@ function getQueryParam(param) {
 
 // Check if user is logged in
 function checkAuth() {
-    if (!sessionStorage.getItem('user')) {
-        const currentPage = window.location.pathname.split('/').pop();
-        const publicPages = ['index.html', 'signin.html', 'login.html'];
-        
-        if (!publicPages.includes(currentPage) && currentPage !== '') {
-            window.location.href = 'index.html';
+
+    const currentUser =
+        localStorage.getItem('currentUser');
+
+    if (!currentUser) {
+
+        const currentPage =
+            window.location.pathname
+            .split('/')
+            .pop();
+
+        const publicPages = [
+            'index.html',
+            'signin.html',
+            'login.html'
+        ];
+
+        if (
+            !publicPages.includes(currentPage)
+            && currentPage !== ''
+        ) {
+
+            window.location.href =
+                'index.html';
         }
     }
 }
